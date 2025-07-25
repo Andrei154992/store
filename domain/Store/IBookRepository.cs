@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace Store
 {
-    public interface IBookRepositiry
+    public interface IBookRepository
     {
         Book[] GetAllByIsbn(string isbn);
 
         Book[] GetAllByTitleOrAuthor(string titlePart);
+
+        Book GetById(int id);
     }
 }

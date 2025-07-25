@@ -1,0 +1,29 @@
+﻿@model Store.Book[]
+
+@{
+    ViewData["Title"] = "Результаты поиска";
+}
+
+<h1>Результаты поиска</h1>
+
+@if (Model == null)
+{
+    <p>Введён пустой поисковой запрос.</p>
+}
+else if (!Model.Any())
+{
+    <p>Ничего не найдено.</p>
+}
+else
+{
+    <ul>
+        @foreach (var book in Model)
+        {
+            <li>
+                <a href="@Url.Action("Index", "Book", new { id = book.ID })">
+                    @book.Title
+                </a>
+            </li>
+        }
+    </ul>
+}
