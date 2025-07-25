@@ -8,14 +8,14 @@ namespace Store
 {
     public class BookService
     {
-        private readonly IBookRepositiry bookRepositiry;
+        private readonly IBookRepository bookRepositiry;
 
-        public BookService(IBookRepositiry bookRepositiry)
+        public BookService(IBookRepository bookRepositiry)
         {
             this.bookRepositiry = bookRepositiry;
         }
 
-        public Book[] GetAlByQuery(string query)
+        public Book[] GetAllByQuery(string query)
         {
             if (Book.IsIsbn(query))
             {
