@@ -17,19 +17,14 @@
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Искать</button>
             </form>
             <span class="navbar-text m-lg-auto ">
-                @{
-                    Cart cart = new Cart();
-
-                    if (!Context.Session.TryGetCart(out cart))
-                        cart = new Cart();
-
-                    if (cart.Items.Count == 0)
+                @{                    
+                    if (Context.Session.TryGetCart(out Cart cart) && cart.TotalCount > 0)
                     {
-                        @:Корзина пуста
+                        <a href="@Url.Action("Index", "Order")">Всего товаров @cart.TotalCount на сумму @cart.TotalPrice ₽</a>
                     }
                     else
                     {
-                        @:Всего товаров @cart.Items.Count на сумму @cart.Amount
+                        @:Корзина пуста
                     }
                 }
             </span>
