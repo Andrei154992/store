@@ -41,5 +41,14 @@ namespace Store_Memory
         {
             return books.Single(book => book.ID == id);
         }
+
+        public Book[] GetAllByIds(IEnumerable<int> bookIds)
+        {
+            var founfBooks = from book in books
+                             join bookId in bookIds on book.ID equals bookId
+                             select book;
+
+            return founfBooks.ToArray();
+        }
     }
 }

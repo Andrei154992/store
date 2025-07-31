@@ -20,9 +20,7 @@
                 @{                    
                     if (Context.Session.TryGetCart(out Cart cart) && cart.TotalCount > 0)
                     {
-                        //int sum = cart.Items.Sum(x => x.Value);
-
-                        @:Всего товаров @cart.TotalCount на сумму @cart.TotalPrice ₽
+                        <a href="@Url.Action("Index", "Order")">Всего товаров @cart.TotalCount на сумму @cart.TotalPrice ₽</a>
                     }
                     else
                     {

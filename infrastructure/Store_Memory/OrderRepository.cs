@@ -23,7 +23,7 @@ namespace Store_Memory
 
         public Order GetById(int id)
         {
-            return orders.Single(order =>  order.Id == id);
+            return orders.Single(order => order.Id == id);
         }
 
         public void Update(Order order)
