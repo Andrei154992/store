@@ -28,6 +28,89 @@ namespace Store_Web.Controllers
             return View("Empty");
         }
 
+        public IActionResult AddBook(int id)
+        {            
+            Order order;
+            Cart cart;
+
+            if (HttpContext.Session.TryGetCart(out cart))
+            {
+                order = orderRepository.GetById(cart.OrderId);
+            }
+            else
+            {
+                order = orderRepository.Create();
+                cart = new Cart(order.Id);
+            }
+
+            var book = bookRepository.GetById(id);
+            order.AddOrUpdateItem(book, 1);
+            orderRepository.Update(order);
+
+            cart.TotalCount = order.TotalCount;
+            cart.TotalPrice = order.TotalPrice;
+
+            HttpContext.Session.Set(cart);
+
+            return RedirectToAction("Index", "Book", new { id });
+        }
+
+        public IActionResult RemoveBook(int id)
+        {
+            Order order;
+            Cart cart;
+
+            if (HttpContext.Session.TryGetCart(out cart))
+            {
+                order = orderRepository.GetById(cart.OrderId);
+            }
+            else
+            {
+                order = orderRepository.Create();
+                cart = new Cart(order.Id);
+            }
+
+            var book = bookRepository.GetById(id);
+            order.RemoveItem(book, 1);
+            orderRepository.Update(order);
+
+            cart.TotalCount = order.TotalCount;
+            cart.TotalPrice = order.TotalPrice;
+
+            HttpContext.Session.Set(cart);
+
+            return RedirectToAction("Index", "Book", new { id });
+        }
+
+        public IActionResult RemoveItem(int id)
+        {
+            Order order;
+            Cart cart;
+
+            if (HttpContext.Session.TryGetCart(out cart))
+            {
+                order = orderRepository.GetById(cart.OrderId);
+            }
+            else
+            {
+                order = orderRepository.Create();
+                cart = new Cart(order.Id);
+            }
+
+            var book = bookRepository.GetById(id);
+            order.RemoveItems(book);
+            orderRepository.Update(order);
+
+            cart.TotalCount = order.TotalCount;
+            cart.TotalPrice = order.TotalPrice;
+
+            HttpContext.Session.Set(cart);
+
+            return RedirectToAction("Index", "Book", new { id });
+        }
+
+    
+
         private OrderModel Map(Order order)
         {
             var bookIds = order.Items.Select(item => item.BookId);
@@ -49,33 +132,6 @@ namespace Store_Web.Controllers
                 TotalCount = order.TotalCount,
                 TotalPrice = order.TotalPrice,
             };
-        }
-
-        public IActionResult AddItem(int id)
-        {            
-            Order order;
-            Cart cart;
-
-            if (HttpContext.Session.TryGetCart(out cart))
-            {
-                order = orderRepository.GetById(cart.OrderId);
-            }
-            else
-            {
-                order = orderRepository.Create();
-                cart = new Cart(order.Id);
-            }
-
-            var book = bookRepository.GetById(id);
-            order.AddItem(book, 1);
-            orderRepository.Update(order);
-
-            cart.TotalCount = order.TotalCount;
-            cart.TotalPrice = order.TotalPrice;
-
-            HttpContext.Session.Set(cart);
-
-            return RedirectToAction("Index", "Book", new { id });
         }
     }
 }

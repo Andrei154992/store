@@ -66,7 +66,7 @@ namespace Store.Tests
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                order.AddItem(null, 1);
+                order.AddOrUpdateItem(null, 1);
             });
         }
     }

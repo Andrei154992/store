@@ -37,7 +37,7 @@ namespace Store
             get { return items.Sum(items => items.Price * items.Count); }
         }
 
-        public void AddItem(Book book, int count)
+        public void AddOrUpdateItem(Book book, int count)
         {
             if (book == null) 
                 throw new ArgumentNullException(nameof (book));
@@ -53,6 +53,59 @@ namespace Store
                 items.Remove(item);
                 items.Add(new OrderItem(book.ID, item.Count + count,  book.Price));
             }
+        }
+
+        public void AddBook(Book book)
+        {
+            if (book == null)
+                throw new ArgumentNullException(nameof(book));
+
+            AddOrUpdateItem(book, 1);
+        }
+
+        public void RemoveBook(Book book)
+        {
+            if (book == null)
+                throw new ArgumentNullException(nameof(book));
+
+            AddOrUpdateItem(book, -1);
+        }
+
+        public void RemoveItem(Book book, int count)
+        {
+            if (book == null)
+                throw new ArgumentNullException(nameof(book));
+
+            if (items.Count == 0)
+                throw new InvalidOperationException("Cart must contain items");
+
+            var item = items.SingleOrDefault(x => x.BookId == book.ID);
+
+            if (item == null)
+                throw new InvalidOperationException("Cart does not contain item with ID: " + book.ID);
+
+            items.Remove(item);
+
+            if (item.Count - count == 0)
+                return;
+
+            items.Add(new OrderItem(book.ID, item.Count - count, book.Price));
+        }
+
+        public void RemoveItem(Book book)
+        {
+            if (book == null)
+                throw new ArgumentNullException(nameof(book));
+
+            if (items.Count == 0)
+                throw new InvalidOperationException("Cart must contain items");
+
+            var item = items.SingleOrDefault(x => x.BookId == book.ID);
+
+            if (item == null)
+                throw new InvalidOperationException("Cart does not contain item with ID: " + book.ID);
+
+            items.RemoveAll(x => x.BookId == book.ID);
         }
     }
 }
