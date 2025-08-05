@@ -37,75 +37,50 @@ namespace Store
             get { return items.Sum(items => items.Price * items.Count); }
         }
 
+        public OrderItem GetItem(int bookId)
+        {
+            int index = items.FindIndex(item => bookId == item.BookId);
+
+            if (index == -1)
+                ThrowBookException("Book not found.", bookId);
+
+            return items[index];
+        }
+
         public void AddOrUpdateItem(Book book, int count)
         {
             if (book == null) 
                 throw new ArgumentNullException(nameof (book));
 
-            var item = items.SingleOrDefault(x => x.BookId == book.ID);
+            int index = items.FindIndex(item => book.ID == item.BookId);
 
-            if (item == null)
+            if (index == -1)
             {
                 items.Add(new OrderItem(book.ID, count, book.Price));
             }
             else
             {
-                items.Remove(item);
-                items.Add(new OrderItem(book.ID, item.Count + count,  book.Price));
+                items[index].Count += count;
             }
         }
 
-        public void AddBook(Book book)
+        public void RemoveItem(int bookId)
         {
-            if (book == null)
-                throw new ArgumentNullException(nameof(book));
+            int index = items.FindIndex(item => bookId == item.BookId);
 
-            AddOrUpdateItem(book, 1);
+            if (index == -1)
+                ThrowBookException("Order does not contain specified book.", bookId);
+
+            items.RemoveAt(index);
         }
 
-        public void RemoveBook(Book book)
+        private void ThrowBookException(string message, int bookId)
         {
-            if (book == null)
-                throw new ArgumentNullException(nameof(book));
+            var exception = new InvalidOperationException(message);
 
-            AddOrUpdateItem(book, -1);
-        }
+            exception.Data["BookId"] = bookId;
 
-        public void RemoveItem(Book book, int count)
-        {
-            if (book == null)
-                throw new ArgumentNullException(nameof(book));
-
-            if (items.Count == 0)
-                throw new InvalidOperationException("Cart must contain items");
-
-            var item = items.SingleOrDefault(x => x.BookId == book.ID);
-
-            if (item == null)
-                throw new InvalidOperationException("Cart does not contain item with ID: " + book.ID);
-
-            items.Remove(item);
-
-            if (item.Count - count == 0)
-                return;
-
-            items.Add(new OrderItem(book.ID, item.Count - count, book.Price));
-        }
-
-        public void RemoveItem(Book book)
-        {
-            if (book == null)
-                throw new ArgumentNullException(nameof(book));
-
-            if (items.Count == 0)
-                throw new InvalidOperationException("Cart must contain items");
-
-            var item = items.SingleOrDefault(x => x.BookId == book.ID);
-
-            if (item == null)
-                throw new InvalidOperationException("Cart does not contain item with ID: " + book.ID);
-
-            items.RemoveAll(x => x.BookId == book.ID);
+            throw exception;
         }
     }
 }
