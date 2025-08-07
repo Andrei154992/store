@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Store;
+using Store.Contractors;
+using Store.Messages;
 using Store_Memory;
 using Store_Web.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace Store_Web.Controllers
 {
@@ -9,13 +13,21 @@ namespace Store_Web.Controllers
     {
         private readonly IBookRepository bookRepository;
         private readonly IOrderRepository orderRepository;
+        private readonly IEnumerable<IDeliveryService> deliveryServices;
+        private readonly INotificationService notificationService;
 
-        public OrderController(IBookRepository bookRepository, IOrderRepository orderRepository)
+        public OrderController(IBookRepository bookRepository,
+                               IOrderRepository orderRepository,
+                               IEnumerable<IDeliveryService> deliveryServices,
+                               INotificationService notificationService)
         {
             this.bookRepository = bookRepository;
             this.orderRepository = orderRepository;
+            this.deliveryServices = deliveryServices;
+            this.notificationService = notificationService;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             if (HttpContext.Session.TryGetCart(out Cart cart))
@@ -28,6 +40,7 @@ namespace Store_Web.Controllers
             return View("Empty");
         }
 
+        [HttpPost]
         public IActionResult AddItem(int bookId, int count = 1)
         {
             (Order order, Cart cart) = GetOrCreateOrderAndCart(bookId);
@@ -53,6 +66,7 @@ namespace Store_Web.Controllers
             return RedirectToAction("Index", "Order");
         }
 
+        [HttpPost]
         public IActionResult RemoveItem(int bookId)
         {
             (Order order, Cart cart) = GetOrCreateOrderAndCart(bookId);
@@ -64,6 +78,126 @@ namespace Store_Web.Controllers
             return RedirectToAction("Index", "Order");
         }
 
+
+        [HttpPost]
+        public IActionResult SendConfirmationCode(int id, string cellPhone)
+        {
+            var order = orderRepository.GetById(id);
+            var model = Map(order);
+
+            if (!IsValidCellPhone(cellPhone))
+            {
+                model.Errors["cellPhone"] = "Номер телефона не соответствует формату +79876543210";
+                return View("Index", model);
+            }
+
+            int code = 1111;
+            HttpContext.Session.SetInt32(cellPhone, code);
+            notificationService.SendConfirmationCode(cellPhone, code);
+
+            return View("Confirmation",
+                        new ConfirmationModel
+                        {
+                            OrderId = id,
+                            CellPhone = cellPhone
+                        });
+        }
+
+        private bool IsValidCellPhone(string cellPhone)
+        {
+            if (cellPhone == null)
+                return false;
+
+            cellPhone = cellPhone.Replace(" ", "").Replace("-", "");
+
+            return Regex.IsMatch(cellPhone, @"^\+?\d{11}$");
+        }
+
+        [HttpPost]
+        public IActionResult Confirmate(int id, string cellPhone, int code)
+        {
+            int? storedCode = HttpContext.Session.GetInt32(cellPhone);
+            if (storedCode == null)
+            {
+                return View("Confirmation",
+                        new ConfirmationModel
+                        {
+                            OrderId = id,
+                            CellPhone = cellPhone,
+                            Errors = new Dictionary<string, string>
+                            {
+                                { "code", "Пустой код, повторите отправку." }
+                            }
+                        });
+            }
+
+            if (code == 0)
+            {
+                return View("Confirmation",
+                        new ConfirmationModel
+                        {
+                            OrderId = id,
+                            CellPhone = cellPhone,
+                            Errors = new Dictionary<string, string>
+                            {
+                                { "code", "В поле ввода необходимо указать ваш код." }
+                            }
+                        });
+            }
+
+            if (storedCode != code)
+            {
+                return View("Confirmation",
+                        new ConfirmationModel
+                        {
+                            OrderId = id,
+                            CellPhone = cellPhone,
+                            Errors = new Dictionary<string, string>
+                            {
+                                { "code", "Отличается от отправленного." }
+                            }
+                        });
+            }
+
+            // todo: сохранить CellPhone
+
+            HttpContext.Session.Remove(cellPhone);
+
+            var model = new DeliveryModel
+            {
+                OrderId = id,
+                Methods = deliveryServices.ToDictionary(service => service.UniqueCode,
+                                                        service => service.Title)
+            };
+
+            return View("DeliveryMethod", model);
+        }
+
+        [HttpPost]
+        public IActionResult StartDelivery(int id, string uniqueCode)
+        {
+            var deliveryService = deliveryServices.Single(service => service.UniqueCode == uniqueCode);
+            var order = orderRepository.GetById(id);
+
+            var form = deliveryService.CreateForm(order);
+
+            return View("DeliveryStep", form);
+        }
+
+        [HttpPost]
+        public IActionResult NextDelivery(int id, string uniqueCode, int step, Dictionary<string, string> values)
+        {
+            var deliveryService = deliveryServices.Single(service => service.UniqueCode == uniqueCode);
+
+            var form = deliveryService.MoveNext(id, step, values);
+
+            if (form.IsFinal)
+            {
+                return View();
+            }
+
+            return View("DeliveryStep", form);
+        }
 
 
 
