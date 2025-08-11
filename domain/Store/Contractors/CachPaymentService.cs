@@ -22,7 +22,7 @@ namespace Store.Contractors
             if (form.UniqueCode != UniqueCode || !form.IsFinal)
                 throw new InvalidOperationException("Invalid payment form.");
 
-            return new OrderPayment(UniqueCode, Title, new Dictionary<string, string>());
+            return new OrderPayment(UniqueCode, "Оплата наличными", new Dictionary<string, string>());
         }
 
         public Form MoveNextForm(int orderId, int step, IReadOnlyDictionary<string, string> value)
