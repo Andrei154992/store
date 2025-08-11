@@ -27,6 +27,12 @@ namespace Store
             get {  return items; }
         }
 
+        public string CellPhone { get; set; }
+
+        public OrderDelivery Delivery { get; set; }
+
+        public OrderPayment Payment { get; set; }
+
         public int TotalCount
         {
             get { return items.Sum(items => items.Count); }
@@ -34,7 +40,8 @@ namespace Store
 
         public decimal TotalPrice
         {
-            get { return items.Sum(items => items.Price * items.Count); }
+            get { return items.Sum(items => items.Price * items.Count) 
+                    + (Delivery?.Amount ?? 0m); }
         }
 
         public OrderItem GetItem(int bookId)
