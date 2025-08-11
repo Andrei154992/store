@@ -1,5 +1,7 @@
-﻿using Store_Web.Models;
+﻿using Microsoft.AspNetCore.Http;
+using Store_Web.Models;
 using System.Text;
+
 
 namespace Store_Web
 {
@@ -39,11 +41,7 @@ namespace Store_Web
                     var totalCount = reader.ReadInt32(); 
                     var totalPrice = reader.ReadDecimal();
 
-                    value = new Cart(orderId)
-                    {
-                        TotalCount = totalCount,
-                        TotalPrice = totalPrice
-                    };
+                    value = new Cart(orderId, totalCount, totalPrice);
 
                     return true;
                 }

@@ -6,6 +6,7 @@ using Store.Web.Contractors;
 using Store_Memory;
 using Store_Web.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography.Xml;
 using System.Text.RegularExpressions;
 
 namespace Store_Web.Controllers
@@ -281,8 +282,7 @@ namespace Store_Web.Controllers
         {
             orderRepository.Update(order);
 
-            cart.TotalCount = order.TotalCount;
-            cart.TotalPrice = order.TotalPrice;
+            cart = new Cart(order.Id, order.TotalCount, order.TotalPrice);
 
             HttpContext.Session.Set(cart);
         }
@@ -299,7 +299,7 @@ namespace Store_Web.Controllers
             else
             {
                 order = orderRepository.Create();
-                cart = new Cart(order.Id);
+                cart = new Cart(order.Id, 0 , 0m);
             }
 
             return (order, cart);

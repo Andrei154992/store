@@ -27,7 +27,7 @@
 				<td class="">@Model.Items[i].Count</td>
 				<td class="">@Model.Items[i].Price ₽</td>
 				<td class="text-center">
-					<form class="d-inline-flex" action="@Url.Action("SendConfirmationCode", "Order")" method="post">
+					<form class="d-inline-flex" action="@Url.Action(nameof (OrderController.SendConfirmationCode), "Order")" method="post">
 						<input type="hidden" name="bookId" value="@Model.Items[i].BookId"/>
 						<button class="btn btn-danger" type="submit">Удалить</button>
 					</form>
