@@ -1,6 +1,6 @@
 ﻿using Store;
 
-namespace Store_Web.Models
+namespace Store.Web.App
 {
     public class OrderModel
     {

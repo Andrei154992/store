@@ -27,7 +27,7 @@
 				<td class="">@Model.Items[i].Count</td>
 				<td class="">@Model.Items[i].Price ₽</td>
 				<td class="text-center">
-					<form class="d-inline-flex" action="@Url.Action(nameof (OrderController.SendConfirmationCode), "Order")" method="post">
+					<form class="d-inline-flex" action="@Url.Action(nameof (OrderController.RemoveItem), "Order")" method="post">
 						<input type="hidden" name="bookId" value="@Model.Items[i].BookId"/>
 						<button class="btn btn-danger" type="submit">Удалить</button>
 					</form>
@@ -44,11 +44,16 @@
 	</tfoot>
 </table>
 
-<form action="@Url.Action("SendConfirmationCode", "Order")" method="post">
+<p>
+	Для оформления заказа необходимо подтвердить номер вашего мобильного.
+	Введите номер и нажмите <em>Отправить код</em>. На ваш номер будет отправлен *код подтверждения*.
+</p>
+
+<form action="@Url.Action(nameof (OrderController.SendConfirmation), "Order")" method="post">
 	<input type="hidden" name="id" value="@Model.Id" />
 	<div class="mb-2">
 		<label class="mb-2" for="cellPhone">Мобильный телефон</label>
-		<input type="text" class="form-control" name="cellPhone" value="+79876543210" />
+		<input type="text" class="form-control" name="cellPhone" placeholder="+79876543210" value=" +79876543210" />
 		@if (Model.Errors.ContainsKey("cellPhone"))
 		{
 			<small class="form-text text-danger">@Model.Errors["cellPhone"]</small>

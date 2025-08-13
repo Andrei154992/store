@@ -11,11 +11,13 @@
         public IReadOnlyDictionary<string, string>? Pararmetres { get; }
 
         public OrderDelivery(string? uniqueCode, string? description,
-            decimal amount, IReadOnlyDictionary<string, string>? pararmetres)
+                             decimal amount, IReadOnlyDictionary<string, string>? pararmetres)
         {
-            if (string.IsNullOrWhiteSpace(uniqueCode) || string.IsNullOrWhiteSpace(description))
-                throw new ArgumentException(string.IsNullOrWhiteSpace(uniqueCode) ?
-                    nameof (uniqueCode) : nameof (description));
+            if (string.IsNullOrWhiteSpace(uniqueCode))
+                throw new ArgumentException(nameof(uniqueCode));
+
+            if (string.IsNullOrWhiteSpace(description))
+                throw new ArgumentException(nameof(description));
 
             if (pararmetres == null)
                 throw new ArgumentNullException(nameof (pararmetres));
