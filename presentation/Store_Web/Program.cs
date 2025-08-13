@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Store;
 using Store.Contractors;
 using Store.Messages;
+using Store.Web.App;
 using Store.Web.Contractors;
 using Store.YandexKassa;
 using Store_Memory;
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -29,6 +31,7 @@ builder.Services.AddSingleton<IPaymentService, YandexKassaPaymentService>();
 builder.Services.AddSingleton<IWebContractorService, YandexKassaPaymentService>();
 
 builder.Services.AddSingleton<BookService>();
+builder.Services.AddSingleton<OrderService>();
 
 var app = builder.Build();
 
@@ -49,13 +52,15 @@ app.UseAuthorization();
 
 app.UseSession();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "areas",
+        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
-app.MapAreaControllerRoute(
-    name: "yandex.kassa",
-    areaName: "YandexKassa",
-    pattern: "YandexKassa/{controller=Home}/{action=Index}/{id?}");
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+});
 
 app.Run();

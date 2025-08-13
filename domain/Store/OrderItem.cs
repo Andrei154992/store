@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Store
+﻿namespace Store
 {
     public class OrderItem
     {
@@ -28,7 +22,7 @@ namespace Store
 
         public decimal Price { get; }
 
-        public OrderItem(int bookId, int count, decimal price)
+        public OrderItem(int bookId, decimal price, int count)
         {
             ThrowsIfInvalidCount(count);
 
